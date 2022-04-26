@@ -1,0 +1,68 @@
+#!/bin/env bash
+
+black='\e[0;30m'
+white='\e[0;37m'
+yellow='\e[0;33m'
+red='\e[31m'
+bold='\e[1m'
+bg_green='\e[1;42m'
+default='\e[0m'
+
+Title()
+{
+	echo "        _                   _ _"
+	echo "   __ _| | _____        ___| (_)"
+	echo "  / _\` | |/ / __|_____ / __| | |"
+	echo " | (_| |   <\\__ |_____| (__| | |"
+	echo "  \\__,_|_|\\_|___/      \\___|_|_|"
+	echo
+}
+
+Help()
+{
+  echo
+  echo -e "${bg_green}Check the AllkeyShop Prices from your terminal ${bold}(Unofficial)${default}"
+  echo
+  echo -e "${yellow}Syntax: akscli [-h]${default}"
+  echo "options: "
+  echo "h    Print this Help."
+  echo 
+  echo "created by macro21KGB (https://github.com/macro21KGB)"
+  echo "-----------------------------------------------------"
+}
+
+if ! command -v xmllint &> /dev/null
+then
+    echo -e "${bold}${red}xmllint could not be found${default}"
+	echo -e "${red}You can install the libxml2-utils library from your package manager${default}"
+    exit
+fi
+
+Title
+
+# Show Help menu
+[ "$1" == "-h" ] && Help
+[ "$1" == "--help" ] && Help
+
+# GAMENAME Reading a Parsing
+IFS= read -r -p "Enter the name of the game: " GAMENAMEP
+GAMENAME=$(echo $GAMENAMEP | sed -r 's/\s+/-/g')
+
+# FETCH THE GAMES DATA FROM ALLKEYSHOP
+curl -sSL https://www.allkeyshop.com/blog/catalogue/search-$GAMENAME/ > $HOME/.cache/gamelist.html
+
+
+# Take Games and their prices
+GAMES=$(xmllint --html --xpath "//a[contains(@class, "search-results-row-link")]/div[2]/h2/text()" $HOME/.cache/gamelist.html 2> /dev/null | sed 's/$/;/g')
+GAMENUM=$(xmllint --html --xpath "//a[contains(@class, "search-results-row-link")]/div[2]/h2/text()" $HOME/.cache/gamelist.html 2> /dev/null | sed 's/$/\n/g' | wc -l) 
+PRICES=$(xmllint --html --xpath "//a[contains(@class, "search-results-row-link")]/div[4]/text()" $HOME/.cache/gamelist.html 2> /dev/null | grep -E '[0-9.]' | xargs | sed 's/ /;/g')
+
+echo " "$GAMES$PRICES | awk -F';' -v myvar="$GAMENUM" '{
+		half=myvar/2
+	    for (i = 1; i <= half; i++) {
+        	print $i" "$(half + i)
+       	}
+}'
+
+echo -e "${yellow} https://www.allkeyshop.com/blog/catalogue/search-$GAMENAME/${default}"
+
