@@ -13,7 +13,7 @@ you can copy the **akscli** script or use this one-line install
 ```bash
 
 sudo curl -sSL https://raw.githubusercontent.com/macro21KGB/akscli/main/akscli -o /usr/local/bin/akscli 
-sudo chmod +x ~/.local/bin/akscli
+sudo chmod +x usr/local/bin/akscli
 ```
 
 # Usage
